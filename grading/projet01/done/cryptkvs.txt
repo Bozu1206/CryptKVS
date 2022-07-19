@@ -1,0 +1,7 @@
+"Available commands:\n"
+"cryptkvs <database> stats\n"
+"cryptkvs <database> get <key> <password>\n"
+"cryptkvs <database> set <key> <password> <filename>\n"
+"cryptkvs <database> new <key> <password>\n"
+
+ 

@@ -1,0 +1,87 @@
+- ckvs_io.h: 4    # max 4, 
+- ckvs_io.c: # NE PAS REMPLIR CETTE LIGNE
+  - ckvs_write_entry_to_disk: # NE PAS REMPLIR CETTE LIGNE
+      offset: 2                     # max 2, 
+      fseek: 2                      # max 2, 
+      fwrite: 2                     # max 2, 
+      gestions des erreurs: 1       # max 2, -1: ce n'est pas à ckvs_write_entry_to_disk de fermer la DB en cas d'erreur, mais à la fonction qui a appelé ckvs_open
+  - count_one_bits: # NE PAS REMPLIR CETTE LIGNE
+      modularisation: 2       # max 2, 
+      corps: 5                # max 5, 
+  - ckvs_open: # NE PAS REMPLIR CETTE LIGNE
+      tests arguments: 1                # max 1, 
+      open + test erreur: 1.5           # max 2, -0.5: appeler ckvs_close quand la database n'est pas encore ouverte (ie. dans ckvs_open) n'est pas logique/robuste
+      read header + test erreur: 1.75   # max 2, -0: initialisation du header inutile ; -0.25: initialization trop compliquée, un seul memset suffit
+      check header + test erreur: 5     # max 5, 
+      read entries + test erreur: 1.75  # max 2, -0.25: on peut lire toutes les entrées en 1 seul appel à fread (et un seul memset, optionel)
+  - ckvs_close: 2.5                  # max 2.5, 
+  - ckvs_find_entry: # NE PAS REMPLIR CETTE LIGNE
+      tests arguments: 1.5              # max 1.5, 
+      boucle: 1                         # max 1, 
+      key: 3                            # max 3, 
+      SHA: 3                            # max 3, 
+      retours: 3                        # max 3, -0: je note le comma, mais qu'apporte-t-il par rapport au ';', beaucoup plus clair ? 
+  - ckvs_write_encrypted_value: # NE PAS REMPLIR CETTE LIGNE
+      tests arguments: 1.5                 # max 1.5, 
+      fseek + test erreur: 2               # max 2, -0: ce n'est pas à ckvs_write_encrypted_value de fermer la DB en cas d'erreur, mais à la fonction qui a appelé ckvs_open
+      offset: 2                            # max 2, 
+      fwrite content + test erreur: 2      # max 2, 
+      set + write entry: 3                 # max 3, 
+  - read_value_file_content: # NE PAS REMPLIR CETTE LIGNE
+      tests arguments: 1.5              # max 1.5, 
+      open + test erreur: 2             # max 2, 
+      file size + test erreur: 3        # max 3, 
+      lecture de la valeur: 12          # max 12, 
+      close: 1                          # max 1, 
+- ckvs_utils.c: # NE PAS REMPLIR CETTE LIGNE
+  - hex_encode: 3               # max 3, 
+  - SHA256_to_string: 1         # max 1, 
+  - ckvs_cmp_sha: 2             # max 2,
+  - print_X: # NE PAS REMPLIR CETTE LIGNE
+      print_SHA: 4            # max 5, -1: buffer est 2 fois trop grand
+      print_header: 2         # max 2, 
+      print_entry: 2          # max 2, 
+- ckvs_crypto.c: # NE PAS REMPLIR CETTE LIGNE
+      tests arguments: 1.5            # max 1.5, 
+      concaténation: 8                # max 10, -1: overflow si key fait 32 chars (strncat) ; -1: overflow si pwd est trop long (strncat avec CKVS_MAXKEYLEN)
+      SHA: 2                          # max 2, 
+      HMAC key: 3                     # max 3, 
+      HMAC C1: 3                      # max 3, 
+      modularisation: 2               # max 2, 
+- ckvs_local.c: # NE PAS REMPLIR CETTE LIGNE
+  - ckvs_local_stats: # NE PAS REMPLIR CETTE LIGNE
+      tests arguments: 0.5            # max 0.5, 
+      open + test erreur: 2           # max 2, 
+      print header: 1                 # max 1, 
+      print valid entries: 3          # max 4, -1: strnlen pour éviter débordement si key non NULL-terminated (en fait, comparer le 1er char suffit)
+      close: 1                        # max 1, 
+  - ckvs_local_getset: # NE PAS REMPLIR CETTE LIGNE
+      tests arguments: 1.5                  # max 1.5, 
+      open + test erreur: 2                 # max 2, 
+      encrypt + test erreur: 3              # max 3, 
+      find entry + test erreur: 2.5         # max 3, -0.5: il faut créer un ckvs_entry_t* e_out = NULL; et utiliser ckvs_find_entry(&e_out)
+      generate C2 + test erreur: 3          # max 3, 
+      compute masterkey + test erreur: 3    # max 3, 
+  - do_get: # NE PAS REMPLIR CETTE LIGNE
+      read encrypted value: 3         # max 4, -1: VLA avec taille non limitée: utilisez un tableau de taille fixe sur le stack, ou (mieux) calloc
+      decrypt: 3                      # max 3, 
+      print: 1                        # max 1, 
+      close: 1                        # max 1,
+  - do_set: # NE PAS REMPLIR CETTE LIGNE
+      encrypt: 4                      # max 4, 
+      write: 1.5                      # max 1.5, 
+      close: 1                        # max 1,
+  - ckvs_local_get: 1.5            # max 2, -0.5: strlen -> débordement si key fait 32 chars
+  - ckvs_local_set: # NE PAS REMPLIR CETTE LIGNE
+      tests arguments: 2               # max 2, -0: strlen -> débordement si key fait 32 chars
+      read value + test erreur: 1      # max 2, -1: si read_value_filecontent retourne une erreur, buffer ne doit pas être free
+      call + free: 3                   # max 3, 
+- cryptkvs.c: # NE PAS REMPLIR CETTE LIGNE
+  - help/usage: 0             # max 1, -1: aucune garantie que la boucle for s'arrête au bout de 5 commandes (*p pourrait valoir autre chose que NULL)
+  - ckvs_do_one_cmd: # NE PAS REMPLIR CETTE LIGNE
+      argc check: 1           # max 1,
+      stat: 0                 # max 1, ERR_TOO_MANY_ARGUMENTS si argc > 3
+      get: 1                  # max 3, -2: accès à argv[3] et argv[4] avant de vérifier le nombre d'argument
+      set: 3                  # max 3,
+- style: 0          # max 2, min -2, (normal = 0), 0: les macros dans print_header/entry compliquent la lecture, sans être justifiées (elles ne sont utilisées qu'une seule fois)
+- bonus/malus: 2    # max 5, min -5, (normal = 0), +1: Macros M_REQUIRE_... ; 0: par contre M_FREE_MEMORY fait trop de choses en même temps ; +1: ARG_CHECK macro
